@@ -48,13 +48,20 @@ char* generateValidationDigits(char *incompleteCnpj) {
 char* generateRandomCnpj(char *branch) {
 	if(strlen(branch) == 4) {
 		char *cnpj = malloc((LENGTH+1) * sizeof(char));
+		char *validationDigits = malloc(3 * sizeof(char));
 		for(short int i = 0; i < 8; i++) {
 			char buffer[2];
 			itoa(rand() % 10, buffer, 10);
 			cnpj[i] = buffer[0];
 		}
-		strcat(cnpj, branch);
-		strcat(cnpj, generateValidationDigits(cnpj));
+		for(short int i = 0; i < strlen(branch); i++) {
+			cnpj[i+8] = branch[i];
+		}
+		validationDigits = generateValidationDigits(cnpj);
+		for(short int i = 0; i < strlen(validationDigits); i++) {
+			cnpj[i+12] = validationDigits[i];
+		}
+		cnpj[LENGTH] = '\0';
 		return cnpj;
 	} else {
 		return "e";
@@ -95,21 +102,34 @@ void menuHandler(short int menuOption) {
 	system("cls");
 	switch(menuOption) {
 	case 1:
-		printf("Digite o número da filial/matriz: ");
+		printf("Digite o número da filial/matriz (4 dígitos): ");
 		scanf("%s", branch);
-		printf("CNPJ: %s\n",  formatCnpj(generateRandomCnpj(branch)));
+		fflush(stdin);
+		if(strlen(branch) == 4) {
+			//char *formattedCnpj = ;
+			printf("CNPJ: %s\n", formatCnpj(generateRandomCnpj(branch)));
+			//free(formattedCnpj);
+		} else {
+			printf("O número da filial/matriz deve possuir 4 dígitos.\n");
+		}
 		printf("\nPressione qualquer tecla pra retornar ao menu principal.\n");
 		break;
 	case 2:
 		printf("Digite os 12 dígitos iniciais (apenas números): ");
 		scanf("%s", cnpj);
-		strcpy(validationDigits, generateValidationDigits(cnpj));
-		printf("\nOs dígitos verificadorse são %s.\n", validationDigits);
+		fflush(stdin);
+		if(strlen(cnpj) == 12) {
+			strcpy(validationDigits, generateValidationDigits(cnpj));
+			printf("\nOs dígitos verificadores são %s.\n", validationDigits);
+		} else {
+			printf("Você digitou apenas %d dígitos.\n", (int)strlen(cnpj));
+		}
 		printf("\nPressione qualquer tecla pra retornar ao menu principal.\n");
 		break;
 	case 3:
 		printf("Digite o CNPJ (apenas digitos): ");
 		scanf("%s", cnpj);
+		fflush(stdin);
 		switch(checkCnpjValidity(cnpj)) {
 		case 0:
 			printf("O CNPJ digitado é válido.\n");
@@ -131,18 +151,24 @@ void menuHandler(short int menuOption) {
 	}
 	system("pause>nul");
 }
-char* formatCnpj(char *cnpj) {
+const char* formatCnpj(char *cnpj) {
 	short int formattedCnpjLength = LENGTH+5;
-	char *formattedCnpj = malloc((formattedCnpjLength)*sizeof(char));
+	char *formattedCnpj = malloc(formattedCnpjLength * sizeof(char));
 	short k = 0;
 	if(checkCnpjValidity(cnpj) == 0) {
-		memset(formattedCnpj, ' ', formattedCnpjLength);
-		formattedCnpj[2] = '.';
-		formattedCnpj[6] = '.';
-		formattedCnpj[10] = '/';
-		formattedCnpj[15] = '-';
 		for(short int i = 0; i < formattedCnpjLength; i++) {
-			if(formattedCnpj[i] == ' ') {
+			switch(i) {
+			case 2:
+			case 6:
+				formattedCnpj[i] = '.';
+				break;
+			case 10:
+				formattedCnpj[i] = '/';
+				break;
+			case 15:
+				formattedCnpj[i] = '-';
+				break;
+			default:
 				formattedCnpj[i] = cnpj[k];
 				k++;
 			}

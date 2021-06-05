@@ -59,6 +59,6 @@ void menuHandler(short int menuOption);
  *
  * @return Uma string da forma 12.345.678/0001-95.
  */
-char *formatCnpj(char *cnpj);
+const char *formatCnpj(char *cnpj);
 
 #endif // CNPJ_H_INCLUDED

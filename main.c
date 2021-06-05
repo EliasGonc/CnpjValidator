@@ -9,6 +9,7 @@ int main() {
 	do {
 		printMenu();
 		scanf("%hd", &option);
+		fflush(stdin);
 		menuHandler(option);
 	} while(option != 4);
     return 0;
